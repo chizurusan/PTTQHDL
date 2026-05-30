@@ -1,0 +1,12 @@
+# Old dashboard versions (unused)
+bitcoin_dashboard.html
+bitcoin_dashboard copy.html
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# OS files
+.DS_Store
+Thumbs.db
