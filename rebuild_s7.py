@@ -86,37 +86,8 @@ def kpi_card(bar_color, label, value, val_color, subtitle):
         f'</div>'
     )
 
-cards = [
-    kpi_card(
-        C_GREEN,
-        "N&#259;m T&#259;ng M&#7841;nh Nh&#7845;t",
-        best_yr, C_GREEN,
-        fpc(best_yr_val),
-    ),
-    kpi_card(
-        C_RED,
-        "N&#259;m Gi&#7843;m M&#7841;nh Nh&#7845;t",
-        worst_yr, C_RED,
-        fpc(worst_yr_val),
-    ),
-    kpi_card(
-        C_GREEN,
-        "Th&#225;ng T&#259;ng M&#7841;nh Nh&#7845;t",
-        best_mo, C_GREEN,
-        fpc(best_mo_val),
-    ),
-    kpi_card(
-        C_RED,
-        "Th&#225;ng Gi&#7843;m M&#7841;nh Nh&#7845;t",
-        worst_mo, C_RED,
-        fpc(worst_mo_val),
-    ),
-    kpi_card(
-        C_RED,
-        "Drawdown T&#7889;i &#272;a",
-        fpc(max_dd), C_RED,
-        f"Ng&#224;y&nbsp;{max_dd_date}",
-    ),
+# Hang 1: cac chi so tich cuc (4 card)
+cards_row1 = [
     kpi_card(
         C_NAVY,
         "CAGR H&#224;ng N&#259;m",
@@ -129,72 +100,128 @@ cards = [
         f"{bull_pct}%", C_GREEN,
         f"{bull_months}&nbsp;/&nbsp;{total_months}&nbsp;th&#225;ng",
     ),
+    kpi_card(
+        C_GREEN,
+        "N&#259;m T&#259;ng M&#7841;nh Nh&#7845;t",
+        best_yr, C_GREEN,
+        fpc(best_yr_val),
+    ),
+    kpi_card(
+        C_GREEN,
+        "Th&#225;ng T&#259;ng M&#7841;nh Nh&#7845;t",
+        best_mo, C_GREEN,
+        fpc(best_mo_val),
+    ),
 ]
 
-all_cards = "".join(cards)
+# Hang 2: cac chi so rui ro (3 card)
+cards_row2 = [
+    kpi_card(
+        C_RED,
+        "Drawdown T&#7889;i &#272;a",
+        fpc(max_dd), C_RED,
+        f"Ng&#224;y&nbsp;{max_dd_date}",
+    ),
+    kpi_card(
+        C_RED,
+        "N&#259;m Gi&#7843;m M&#7841;nh Nh&#7845;t",
+        worst_yr, C_RED,
+        fpc(worst_yr_val),
+    ),
+    kpi_card(
+        C_RED,
+        "Th&#225;ng Gi&#7843;m M&#7841;nh Nh&#7845;t",
+        worst_mo, C_RED,
+        fpc(worst_mo_val),
+    ),
+]
+
+row1_html = "".join(cards_row1)
+row2_html = "".join(cards_row2)
 
 # ── 3. Narrative card ─────────────────────────────────────────────────────────
-P = f"margin:0 0 18px;line-height:1.8;font-size:15px;color:#1E293B;font-family:{FONT};"
-P_LAST = f"margin:0;line-height:1.8;font-size:15px;color:#1E293B;font-family:{FONT};"
+P      = (f"margin:0 0 20px;line-height:1.75;font-size:15px;"
+          f"color:#1E293B;font-family:{FONT};")
+P_LAST = (f"margin:0;line-height:1.75;font-size:15px;"
+          f"color:#1E293B;font-family:{FONT};")
+
+# Format 1,000 USD style (khong dung ky hieu $ de tranh nham)
+invest_in  = "1.000 USD"
+invest_out = f"{growth_x * 1000:,.0f} USD".replace(",", ".")
 
 narrative_html = (
     f'<p style="{P}">'
-    f'Bitcoin giai &#273;o&#7841;n 2018&ndash;2026 ghi nh&#7853;n t&#7889;c'
-    f' &#273;&#7897; t&#259;ng tr&#432;&#7903;ng k&#233;p h&#224;ng n&#259;m (CAGR)'
-    f' &#7845;n t&#432;&#7907;ng'
-    f' <strong style="color:{C_GREEN}">{fpc(cagr_pct)}</strong>,'
-    f' bi&#7871;n m&#7897;t kho&#7843;n &#273;&#7847;u t&#432; $1 ban &#273;&#7847;u'
-    f' th&#224;nh <strong style="color:{C_GREEN}">${growth_x}x</strong>.'
-    f' Th&#7883; tr&#432;&#7901;ng c&#243;'
-    f' <strong style="color:{C_GREEN}">{bull_pct}%</strong>'
-    f' s&#7889; th&#225;ng t&#259;ng gi&#225; ({bull_months}/{total_months}&nbsp;th&#225;ng),'
-    f' cho th&#7845;y xu h&#432;&#7899;ng t&#259;ng d&#224;i h&#7841;n v&#432;&#7907;t'
-    f' tr&#7897;i d&#249; bi&#7871;n &#273;&#7897;ng r&#7845;t cao.'
+    f'Bitcoin giai &#273;o&#7841;n 2018&ndash;2026 ghi nh&#7853;n t&#7889;c &#273;&#7897;'
+    f' t&#259;ng tr&#432;&#7903;ng k&#233;p h&#224;ng n&#259;m (CAGR) kho&#7843;ng'
+    f' <strong style="color:{C_GREEN}">{fpc(cagr_pct)}</strong>.'
+    f' N&#7871;u gi&#7843; &#273;&#7883;nh &#273;&#7847;u t&#432; ban &#273;&#7847;u'
+    f' <strong style="color:#1D4ED8">{invest_in}</strong>'
+    f' v&#224;o &#273;&#7847;u k&#7923;, gi&#225; tr&#7883; kho&#7843;n &#273;&#7847;u t&#432;'
+    f' s&#7869; t&#259;ng l&#234;n kho&#7843;ng'
+    f' <strong style="color:{C_GREEN}">{invest_out}</strong>'
+    f' cho &#273;&#7871;n th&#7901;i &#273;i&#7875;m hi&#7879;n t&#7841;i.'
+    f' &#272;i&#7873;u n&#224;y cho th&#7845;y xu h&#432;&#7899;ng t&#259;ng d&#224;i h&#7841;n'
+    f' v&#7851;n n&#7893;i b&#7853;t, d&#249; th&#7883; tr&#432;&#7901;ng c&#243;'
+    f' m&#7913;c bi&#7871;n &#273;&#7897;ng r&#7845;t cao.'
     f'</p>'
 
     f'<p style="{P}">'
-    f'<strong style="color:{C_GREEN}">{best_yr}</strong>'
-    f' l&#224; n&#259;m b&#249;ng n&#7893; m&#7841;nh nh&#7845;t'
-    f' ({fpc(best_yr_val)}), &#273;&#432;&#7907;c th&#250;c &#273;&#7849;y b&#7903;i'
-    f' &#273;&#7841;i d&#7883;ch th&#250;c &#273;&#7849;y t&#237;ch l&#361;y t&#224;i'
-    f' s&#7843;n s&#7889; &amp; DeFi b&#249;ng n&#7893;.'
-    f' Ng&#432;&#7907;c l&#7841;i,'
-    f' <strong style="color:{C_RED}">{worst_yr}</strong>'
-    f' l&#224; n&#259;m t&#7879; nh&#7845;t ({fpc(worst_yr_val)})'
-    f' do b&#7885;ng b&#243;ng ICO 2017 v&#7905;, th&#7883; tr&#432;&#7901;ng'
-    f' &#273;i&#7873;u ch&#7881;nh s&#226;u.'
+    f'Trong giai &#273;o&#7841;n n&#224;y,'
+    f' <strong style="color:{C_GREEN}">{best_yr}</strong>'
+    f' l&#224; n&#259;m t&#259;ng m&#7841;nh nh&#7845;t v&#7899;i m&#7913;c t&#259;ng'
+    f' <strong style="color:{C_GREEN}">{fpc(best_yr_val)}</strong>,'
+    f' trong khi <strong style="color:{C_RED}">{worst_yr}</strong>'
+    f' l&#224; n&#259;m gi&#7843;m m&#7841;nh nh&#7845;t v&#7899;i m&#7913;c gi&#7843;m'
+    f' <strong style="color:{C_RED}">{fpc(worst_yr_val)}</strong>'
+    f' sau giai &#273;o&#7841;n b&#7885;ng b&#243;ng ICO 2017.'
+    f' &#7902; khung th&#225;ng,'
+    f' <strong style="color:{C_GREEN}">{best_mo}</strong>'
+    f' l&#224; th&#225;ng t&#259;ng t&#7889;t nh&#7845;t'
+    f' (<strong style="color:{C_GREEN}">{fpc(best_mo_val)}</strong>),'
+    f' c&#242;n <strong style="color:{C_RED}">{worst_mo}</strong>'
+    f' l&#224; th&#225;ng gi&#7843;m m&#7841;nh nh&#7845;t'
+    f' (<strong style="color:{C_RED}">{fpc(worst_mo_val)}</strong>).'
     f'</p>'
 
     f'<p style="{P_LAST}">'
     f'M&#7913;c drawdown t&#7889;i &#273;a'
     f' <strong style="color:{C_RED}">{fpc(max_dd)}</strong>'
-    f' ph&#7843;n &#225;nh r&#7911;i ro c&#7921;c cao &mdash; tuy nhi&#234;n'
-    f' m&#7895;i chu k&#7923; g&#7845;u trong l&#7883;ch s&#7917; &#273;&#7873;u'
-    f' &#273;&#432;&#7907;c ti&#7871;p n&#7889;i b&#7903;i m&#7897;t &#273;&#7881;nh'
-    f' m&#7899;i cao h&#417;n. C&#225;c c&#7897;t m&#7889;c quan tr&#7885;ng'
-    f' nh&#432; <em>Halving</em>, <em>ETF Spot</em>'
-    f' v&#224; <em>d&#7921; tr&#7919; qu&#7889;c gia</em>'
-    f' &#273;&#225;nh d&#7845;u Bitcoin &#273;ang chuy&#7875;n t&#7915;'
-    f' t&#224;i s&#7843;n &#273;&#7847;u c&#417; sang l&#7899;p t&#224;i s&#7843;n'
-    f' ch&#237;nh th&#7889;ng to&#224;n c&#7847;u.'
+    f' v&#224;o ng&#224;y'
+    f' <strong style="color:{C_RED}">{max_dd_date}</strong>'
+    f' cho th&#7845;y Bitcoin t&#7915;ng tr&#7843;i qua c&#225;c pha &#273;i&#7873;u'
+    f' ch&#7881;nh r&#7845;t s&#226;u. Tuy nhi&#234;n, d&#7919; li&#7879;u c&#361;ng'
+    f' cho th&#7845;y th&#7883; tr&#432;&#7901;ng v&#7851;n c&#243; kh&#7843; n&#259;ng'
+    f' ph&#7909;c h&#7891;i qua nhi&#7873;u chu k&#7923;, &#273;&#7863;c bi&#7879;t'
+    f' khi c&#225;c c&#7897;t m&#7889;c nh&#432; <em>Halving</em>,'
+    f' <em>ETF Spot</em> v&#224; s&#7921; tham gia c&#7911;a t&#7893; ch&#7913;c'
+    f' t&#224;i ch&#237;nh ng&#224;y c&#224;ng l&#224;m r&#245; vai tr&#242; c&#7911;a'
+    f' Bitcoin nh&#432; m&#7897;t l&#7899;p t&#224;i s&#7843;n d&#224;i h&#7841;n.'
     f'</p>'
 )
 
 # ── 4. Build section HTML ─────────────────────────────────────────────────────
 NEW_SECTION = f"""<!-- Section 7: Insights -->
   <style>
-    /* KPI Section 7: 4-col grid, tai su dung .kpi1-card style */
-    .kpi7-grid {{
+    /* Hang 1: 4 card tich cuc */
+    .kpi7-row1 {{
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 16px;
+      margin-bottom: 16px;
+    }}
+    /* Hang 2: 3 card rui ro — 3 col stretch deu toan chieu ngang */
+    .kpi7-row2 {{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
       margin-bottom: 28px;
     }}
-    @media (max-width: 1100px) {{
-      .kpi7-grid {{ grid-template-columns: repeat(2, 1fr); }}
+    @media (max-width: 900px) {{
+      .kpi7-row1 {{ grid-template-columns: repeat(2, 1fr); }}
+      .kpi7-row2 {{ grid-template-columns: repeat(2, 1fr); }}
     }}
     @media (max-width: 500px) {{
-      .kpi7-grid {{ grid-template-columns: 1fr; }}
+      .kpi7-row1, .kpi7-row2 {{ grid-template-columns: 1fr; }}
     }}
   </style>
 
@@ -203,9 +230,14 @@ NEW_SECTION = f"""<!-- Section 7: Insights -->
       Section 7 &mdash; T&#243;m T&#7855;t &amp; Nh&#7853;n X&#233;t
     </div>
 
-    <!-- 7 KPI cards — 4 col desktop -->
-    <div class="kpi7-grid">
-      {all_cards}
+    <!-- Hang 1: CAGR · Bull% · Best Year · Best Month -->
+    <div class="kpi7-row1">
+      {row1_html}
+    </div>
+
+    <!-- Hang 2: Max DD · Worst Year · Worst Month -->
+    <div class="kpi7-row2">
+      {row2_html}
     </div>
 
     <!-- Card nhan xet tong quan -->
