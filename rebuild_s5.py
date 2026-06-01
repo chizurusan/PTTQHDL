@@ -29,19 +29,19 @@ C_BTC    = "#F59E0B"   # amber
 FONT     = "'Segoe UI', system-ui, -apple-system, sans-serif"
 
 def base_layout(height=320, extra_margin=None):
-    m = dict(l=52, r=24, t=16, b=44)
+    m = dict(l=56, r=24, t=16, b=52)
     if extra_margin:
         m.update(extra_margin)
     return dict(
         paper_bgcolor=C_WHITE,
         plot_bgcolor=C_WHITE,
-        font=dict(family=FONT, size=12, color=C_TEXT),
+        font=dict(family=FONT, size=14, color=C_TEXT),
         margin=m,
         showlegend=False,
         hovermode="x unified",
         hoverlabel=dict(
             bgcolor=C_WHITE, bordercolor=C_BORDER,
-            font=dict(family=FONT, size=12, color=C_TEXT),
+            font=dict(family=FONT, size=14, color=C_TEXT),
         ),
         height=height,
     )
@@ -50,7 +50,7 @@ def axis_style(tick_suffix="", dtick=None, tick_format=None):
     d = dict(
         showgrid=True, gridcolor=C_GRID, gridwidth=1,
         linecolor=C_BORDER, linewidth=1,
-        tickfont=dict(color=C_MUTED, size=11),
+        tickfont=dict(color="#475569", size=14),
     )
     if tick_suffix:
         d["ticksuffix"] = tick_suffix
@@ -112,13 +112,13 @@ fig1 = go.Figure(go.Bar(
         line=dict(width=0),
     ),
     hovertemplate=(
-        "<b>%{x|%Y-%m}</b><br>"
-        "Return: %{y:+.2f}%"
+        "<b>Th&#225;ng %{x|%Y-%m}</b><br>"
+        "L&#7907;i nhu&#7853;n: %{y:+.2f}%"
         "<extra></extra>"
     ),
 ))
 
-fig1.update_layout(**base_layout(height=300))
+fig1.update_layout(**base_layout(height=460))
 fig1.update_xaxes(**axis_style(dtick="M12", tick_format="%Y"))
 fig1.update_yaxes(
     **axis_style(tick_suffix="%"),
@@ -131,7 +131,11 @@ print("[+] Building Chart 2 — Yearly Return...")
 colors_y = [C_UP if r >= 0 else C_DOWN for r in yearly["Return"]]
 text_y = [f"+{r:.0f}%" if r >= 0 else f"{r:.0f}%" for r in yearly["Return"]]
 
-y_pad = max(abs(yearly["Return"].min()), abs(yearly["Return"].max()))
+y_min = yearly["Return"].min()
+y_max = yearly["Return"].max()
+# Asymmetric range: padding proportional to each side, not the larger one
+range_lo = -100
+range_hi = y_max * 1.28                        # room for label above tallest bar
 
 fig2 = go.Figure(go.Bar(
     x=yearly["Year"].astype(str),
@@ -142,49 +146,59 @@ fig2 = go.Figure(go.Bar(
     ),
     text=text_y,
     textposition="outside",
-    textfont=dict(size=12, color=C_TEXT, family=FONT),
+    textfont=dict(size=17, color=C_TEXT, family=FONT),
     hovertemplate=(
-        "<b>%{x}</b><br>"
-        "Yearly Return: %{y:+.1f}%"
+        "<b>N&#259;m %{x}</b><br>"
+        "L&#7907;i nhu&#7853;n: %{y:+.1f}%"
         "<extra></extra>"
     ),
     cliponaxis=False,
 ))
 
-_lo2 = base_layout(height=360, extra_margin=dict(l=52, r=24, t=40, b=44))
+_lo2 = base_layout(height=460, extra_margin=dict(l=56, r=24, t=48, b=52))
 _lo2["hovermode"] = "closest"
 fig2.update_layout(**_lo2)
 fig2.update_xaxes(
     showgrid=False,
     linecolor=C_BORDER, linewidth=1,
-    tickfont=dict(color=C_MUTED, size=12),
+    tickfont=dict(color=C_MUTED, size=15),
     zeroline=False,
 )
 fig2.update_yaxes(
     **axis_style(tick_suffix="%"),
     zeroline=True, zerolinecolor="#94A3B8", zerolinewidth=1.5,
-    range=[-(y_pad * 1.35), y_pad * 1.35],
+    range=[range_lo, range_hi],
 )
 
 # ── CHART 3: Monthly Return Heatmap ──────────────────────────────────────────
 print("[+] Building Chart 3 — Monthly Return Heatmap...")
 
-MONTH_LABELS = ["Jan","Feb","Mar","Apr","May","Jun",
-                "Jul","Aug","Sep","Oct","Nov","Dec"]
+MONTH_LABELS_VN = ["Th1","Th2","Th3","Th4","Th5","Th6",
+                    "Th7","Th8","Th9","Th10","Th11","Th12"]
 
 pivot = monthly.pivot(index="Year", columns="Month", values="Return")
 years_list = sorted(pivot.index.tolist())
 
-# Build z matrix row by row (year), col by col (month 1-12)
+# Original colorscale (soft diverging)
+COLORSCALE_HM = [
+    [0.00, "#F87171"],  # red-400   at -50%
+    [0.20, "#FCA5A5"],  # red-300   at -30%
+    [0.38, "#FEE2E2"],  # red-100   at -12%
+    [0.50, "#F9FAFB"],  # near-white at 0%
+    [0.62, "#DCFCE7"],  # green-100 at +12%
+    [0.80, "#86EFAC"],  # green-300 at +30%
+    [1.00, "#4ADE80"],  # green-400 at +50%
+]
+
 z_matrix  = []
 txt_matrix = []
 for yr in years_list:
     z_row, t_row = [], []
     for m in range(1, 13):
-        if m in pivot.columns and not pd.isna(pivot.loc[yr, m]):
-            val = round(pivot.loc[yr, m], 2)
-            z_row.append(val)
+        if m in pivot.columns and yr in pivot.index and not pd.isna(pivot.loc[yr, m]):
+            val  = round(pivot.loc[yr, m], 2)
             sign = "+" if val >= 0 else ""
+            z_row.append(val)
             t_row.append(f"{sign}{val:.1f}%")
         else:
             z_row.append(None)
@@ -192,77 +206,51 @@ for yr in years_list:
     z_matrix.append(z_row)
     txt_matrix.append(t_row)
 
-# Soft diverging colorscale (light enough for dark text #111827)
-# zmin=-50, zmax=50 → extremes reach medium saturation, text stays readable
-COLORSCALE_HM = [
-    [0.00, "#FECACA"],  # red-200  (light red) at -50%
-    [0.30, "#FEF2F2"],  # red-50   (very light) at -20%
-    [0.50, "#FFFFFF"],  # white    at 0%
-    [0.70, "#DCFCE7"],  # green-50 (very light) at +20%
-    [1.00, "#BBF7D0"],  # green-200 (light green) at +50%
-]
-
-# For cells at extreme (< -30% or > +30%), layer a stronger color
-# Achieve by using a 2-segment saturated colorscale:
-COLORSCALE_HM = [
-    [0.00, "#F87171"],  # red-400   saturated at -50%
-    [0.20, "#FCA5A5"],  # red-300   at -30%
-    [0.38, "#FEE2E2"],  # red-100   at -12%
-    [0.50, "#F9FAFB"],  # near-white at 0%
-    [0.62, "#DCFCE7"],  # green-100 at +12%
-    [0.80, "#86EFAC"],  # green-300 at +30%
-    [1.00, "#4ADE80"],  # green-400 saturated at +50%
-]
-
-n_years  = len(years_list)
-hm_height = max(340, n_years * 36 + 80)
+y_labels  = [str(y) for y in years_list]
+n_years   = len(years_list)
+hm_height = max(340, n_years * 44 + 80)
 
 fig3 = go.Figure(go.Heatmap(
     z=z_matrix,
-    x=MONTH_LABELS,
-    y=[str(y) for y in years_list],
+    x=MONTH_LABELS_VN,
+    y=y_labels,
     text=txt_matrix,
-    texttemplate="%{text}",
-    textfont=dict(size=11, family=FONT, color=C_TEXT),
+    texttemplate="<b>%{text}</b>",
+    textfont=dict(size=14, family=FONT, color="#111827"),
     colorscale=COLORSCALE_HM,
-    zmid=0,
-    zmin=-50,
-    zmax=50,
+    zmid=0, zmin=-50, zmax=50,
     showscale=True,
     colorbar=dict(
-        len=0.85,
-        thickness=12,
-        x=1.005,
-        y=0.5,
-        title=dict(text="%", font=dict(size=11, color=C_MUTED)),
+        len=0.85, thickness=13,
+        x=1.005, y=0.5,
+        title=dict(text="T&#7927; su&#7845;t l&#7907;i nhu&#7853;n (%)", font=dict(size=11, color=C_MUTED)),
         tickfont=dict(size=10, color=C_MUTED),
         ticksuffix="%",
         tickvals=[-40, -20, 0, 20, 40],
     ),
-    xgap=3,
-    ygap=3,
+    xgap=3, ygap=3,
     hoverongaps=False,
     hovertemplate=(
-        "<b>%{y} — %{x}</b><br>"
-        "Return: %{z:+.2f}%"
+        "<b>N&#259;m %{y} &mdash; %{x}</b><br>"
+        "L&#7907;i nhu&#7853;n: %{z:+.2f}%"
         "<extra></extra>"
     ),
 ))
 
-_lo3 = base_layout(height=hm_height, extra_margin=dict(l=60, r=80, t=16, b=44))
+_lo3 = base_layout(height=hm_height, extra_margin=dict(l=60, r=100, t=16, b=44))
 _lo3["hovermode"] = "closest"
 fig3.update_layout(**_lo3)
 fig3.update_xaxes(
     side="bottom",
     linecolor=C_BORDER,
-    tickfont=dict(color=C_MUTED, size=12),
+    tickfont=dict(color="#484d57", size=13),
     showgrid=False,
     fixedrange=True,
 )
 fig3.update_yaxes(
     autorange="reversed",
     linecolor=C_BORDER,
-    tickfont=dict(color=C_MUTED, size=11),
+    tickfont=dict(color="#484d57", size=12),
     showgrid=False,
     fixedrange=True,
 )
@@ -287,8 +275,8 @@ fig4.add_trace(go.Scatter(
     customdata=((df["GrowthIndex"] - 1) * 100).values,
     hovertemplate=(
         "<b>%{x|%Y-%m-%d}</b><br>"
-        "Growth: %{y:.3f}x<br>"
-        "Cumulative: +%{customdata:.1f}%"
+        "Ch&#7881; s&#7889; t&#259;ng tr&#432;&#7903;ng: %{y:.3f}x<br>"
+        "T&#237;ch l&#361;y: +%{customdata:.1f}%"
         "<extra></extra>"
     ),
     name="Growth Index",
@@ -366,78 +354,56 @@ div4 = pio.to_html(fig4, full_html=False, include_plotlyjs=False,
                    config=CFG_NONE, div_id="chart-s5-growth")
 
 # ── Build section HTML ────────────────────────────────────────────────────────
-CARD_STYLE = (
-    "background:#FFFFFF;"
-    "border:1px solid #E5E7EB;"
-    "border-radius:16px;"
-    "padding:22px 22px 12px;"
-    "box-shadow:0 4px 12px rgba(0,0,0,0.04);"
-)
-CARD_TITLE = (
-    "font-size:.95em;font-weight:700;color:#111827;"
-    "margin-bottom:4px;font-family:'Segoe UI',system-ui,sans-serif;"
-)
-CARD_SUB = (
-    "font-size:.78em;color:#6B7280;margin-bottom:12px;"
-    "font-family:'Segoe UI',system-ui,sans-serif;"
+FONT_CSS  = "'Segoe UI', system-ui, -apple-system, sans-serif"
+C_TITLE   = f"font-size:22px;font-weight:700;color:#D97706;margin-bottom:6px;font-family:{FONT_CSS};"
+C_SUB_CSS = f"font-size:15px;color:#6B7280;margin-bottom:14px;font-family:{FONT_CSS};line-height:1.5;"
+CARD      = (
+    "background:#FFFFFF;border:1px solid #E5E7EB;border-radius:18px;"
+    "padding:24px 24px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.04);"
+    "margin-bottom:30px;"
 )
 
 NEW_SECTION = f"""<!-- Section 5: Returns -->
-  <style>
-    .s5-grid-2col {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }}
-    @media (max-width: 820px) {{
-      .s5-grid-2col {{ grid-template-columns: 1fr; }}
-    }}
-  </style>
-
   <div class="section">
-    <div class="section-title">Section 5 &mdash; Return &amp; Growth Analysis</div>
+    <div class="section-title">Section 5 &mdash; Ph&#226;n t&#237;ch l&#7907;i nhu&#7853;n &amp; t&#259;ng tr&#432;&#7903;ng</div>
 
-    <!-- Row 1: Monthly Return + Yearly Return -->
-    <div class="s5-grid-2col">
-
-      <!-- Card 1: Monthly Return -->
-      <div style="{CARD_STYLE}">
-        <div style="{CARD_TITLE}">Monthly Return (%)</div>
-        <div style="{CARD_SUB}">
-          Monthly price return 2018&ndash;2026 &mdash; green = gain, red = loss
-        </div>
-        {div1}
+    <!-- Card 1: Monthly Return — full width -->
+    <div style="{CARD}">
+      <div style="{C_TITLE}">L&#7907;i nhu&#7853;n theo th&#225;ng (%)</div>
+      <div style="{C_SUB_CSS}">
+        T&#7927; su&#7845;t l&#7907;i nhu&#7853;n theo th&#225;ng giai &#273;o&#7841;n 2018&ndash;2026
+        &mdash; <span style="color:#10B981;font-weight:600;">xanh l&#224; t&#259;ng</span>,
+        <span style="color:#EF4444;font-weight:600;">&#273;&#7887; l&#224; gi&#7843;m</span>
       </div>
-
-      <!-- Card 2: Yearly Return -->
-      <div style="{CARD_STYLE}">
-        <div style="{CARD_TITLE}">Yearly Return (%)</div>
-        <div style="{CARD_SUB}">
-          Annual Bitcoin performance with % labels on each bar
-        </div>
-        {div2}
-      </div>
-
+      {div1}
     </div>
 
-    <!-- Row 2: Monthly Return Heatmap (full width) -->
-    <div style="{CARD_STYLE}margin-bottom:20px;">
-      <div style="{CARD_TITLE}">Monthly Return Heatmap</div>
-      <div style="{CARD_SUB}">
-        Year &times; Month return pattern &mdash; green = gain, red = loss &mdash;
-        hover on any cell for exact value
+    <!-- Card 2: Yearly Return — full width -->
+    <div style="{CARD}">
+      <div style="{C_TITLE}">L&#7907;i nhu&#7853;n theo n&#259;m (%)</div>
+      <div style="{C_SUB_CSS}">
+        Hi&#7879;u su&#7845;t Bitcoin theo t&#7915;ng n&#259;m, c&#243; nh&#227;n ph&#7847;n tr&#259;m tr&#234;n m&#7895;i c&#7897;t
+      </div>
+      {div2}
+    </div>
+
+    <!-- Card 3: Monthly Return Heatmap — full width -->
+    <div style="{CARD}">
+      <div style="{C_TITLE}">B&#7843;ng nhi&#7879;t &mdash; L&#7907;i nhu&#7853;n Bitcoin theo th&#225;ng</div>
+      <div style="{C_SUB_CSS}">
+        So s&#225;nh t&#7927; su&#7845;t l&#7907;i nhu&#7853;n theo t&#7915;ng th&#225;ng v&#224; t&#7915;ng n&#259;m.
+        M&#224;u xanh l&#224; th&#225;ng t&#259;ng, m&#224;u &#273;&#7887; l&#224; th&#225;ng gi&#7843;m.
       </div>
       {div3}
     </div>
 
-    <!-- Row 3: Growth Index (full width) -->
-    <div style="{CARD_STYLE}">
-      <div style="{CARD_TITLE}">Cumulative Growth Index</div>
-      <div style="{CARD_SUB}">
-        Portfolio value of $1 invested in January 2018 &mdash;
-        current value: <strong style="color:#F59E0B;">{last_val:.2f}x
-        (+{cum_ret:.0f}%)</strong>
+    <!-- Card 4: Growth Index — full width -->
+    <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:18px;padding:24px 24px 14px;box-shadow:0 4px 12px rgba(0,0,0,0.04);">
+      <div style="{C_TITLE}">Ch&#7881; s&#7889; t&#259;ng tr&#432;&#7903;ng t&#237;ch l&#361;y</div>
+      <div style="{C_SUB_CSS}">
+        Gi&#225; tr&#7883; c&#7911;a $1 &#273;&#7847;u t&#432; t&#7915; th&#225;ng 1/2018 &mdash;
+        hi&#7879;n t&#7841;i:
+        <strong style="color:#F59E0B;">{last_val:.2f}x (+{cum_ret:.0f}%)</strong>
       </div>
       {div4}
     </div>

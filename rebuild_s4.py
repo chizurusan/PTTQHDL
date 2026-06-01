@@ -73,6 +73,26 @@ FRAMES = [
     ("Yearly",  yearly),
 ]
 
+# Ten legend tieng Viet theo khung thoi gian
+_CANDLE_LBL = {
+    "Daily":   u"Nến giá BTC",
+    "Weekly":  u"Nến giá BTC (tuần)",
+    "Monthly": u"Nến giá BTC (tháng)",
+    "Yearly":  u"Nến giá BTC (năm)",
+}
+_OHLC_LBL = {
+    "Daily":   u"OHLC BTC",
+    "Weekly":  u"OHLC BTC (tuần)",
+    "Monthly": u"OHLC BTC (tháng)",
+    "Yearly":  u"OHLC BTC (năm)",
+}
+_VOL_LBL = {
+    "Daily":   u"Khối lượng giao dịch",
+    "Weekly":  u"Khối lượng (tuần)",
+    "Monthly": u"Khối lượng (tháng)",
+    "Yearly":  u"Khối lượng (năm)",
+}
+
 # ── 4. Format helpers for hover ───────────────────────────────────────────────
 def fmt_price(s):
     return [f"${v:,.0f}" for v in s]
@@ -109,33 +129,36 @@ def hover_vol(d):
     return [f"<b>{dates.iloc[i]}</b><br>Volume: {vols[i]}" for i in range(len(d))]
 
 # ── 5. BASE LAYOUT HELPER ─────────────────────────────────────────────────────
+# Legend: ngang, goc phai phia tren chart — cach dropdown (goc trai) toan bo chieu rong
 _LEGEND = dict(
     orientation="h",
-    x=0, y=1.04,
-    bgcolor="rgba(255,255,255,0.9)",
-    bordercolor=C_BORDER,
+    xanchor="right", x=0.99,
+    yanchor="top",   y=1.16,
+    bgcolor="rgba(255,255,255,0.85)",
+    bordercolor="#E2E8F0",
     borderwidth=1,
-    font=dict(family=FONT_FAMILY, size=11, color=C_TEXT),
+    font=dict(family=FONT_FAMILY, size=12, color=C_TEXT),
+    itemwidth=30,
 )
 
 def apply_layout(fig, title_text, rows=2):
     fig.update_layout(
         title=dict(
-            text=title_text,
-            font=dict(family=FONT_FAMILY, size=16, color=C_TITLE),
+            text=f"<b>{title_text}</b>",
+            font=dict(family=FONT_FAMILY, size=17, color="#D97706"),
             x=0.5, xanchor="center",
         ),
         paper_bgcolor=C_WHITE,
         plot_bgcolor=C_WHITE,
-        font=dict(family=FONT_FAMILY, size=11, color=C_TEXT),
+        font=dict(family=FONT_FAMILY, size=12, color=C_TEXT),
         legend=_LEGEND,
         hovermode="x unified",
         hoverlabel=dict(
             bgcolor=C_WHITE,
             bordercolor=C_BORDER,
-            font=dict(family=FONT_FAMILY, size=11, color=C_TITLE),
+            font=dict(family=FONT_FAMILY, size=12, color=C_TITLE),
         ),
-        margin=dict(l=60, r=30, t=80, b=50),
+        margin=dict(l=60, r=30, t=115, b=50),
     )
     for r in range(1, rows + 1):
         fig.update_xaxes(
@@ -143,7 +166,7 @@ def apply_layout(fig, title_text, rows=2):
             showgrid=True, gridcolor=C_GRID, gridwidth=1,
             linecolor=C_BORDER, linewidth=1,
             tickcolor=C_BORDER,
-            tickfont=dict(family=FONT_FAMILY, size=10, color=C_MUTED),
+            tickfont=dict(family=FONT_FAMILY, size=13, color="#475569"),
             rangeslider_visible=False,
         )
         fig.update_yaxes(
@@ -151,7 +174,7 @@ def apply_layout(fig, title_text, rows=2):
             showgrid=True, gridcolor=C_GRID, gridwidth=1,
             linecolor=C_BORDER, linewidth=1,
             tickcolor=C_BORDER,
-            tickfont=dict(family=FONT_FAMILY, size=10, color=C_MUTED),
+            tickfont=dict(family=FONT_FAMILY, size=13, color="#475569"),
             zerolinecolor=C_BORDER,
         )
     # Price axis: $ prefix
@@ -180,7 +203,7 @@ for idx, (label, _) in enumerate(FRAMES):
 UPDATEMENUS = [dict(
     type="dropdown",
     direction="down",
-    x=0.01, y=1.12,
+    x=0.0, y=1.16,
     xanchor="left", yanchor="top",
     bgcolor=C_WHITE,
     bordercolor=C_BORDER,
@@ -213,7 +236,7 @@ for i, (label, d) in enumerate(FRAMES):
         decreasing=dict(line=dict(color=C_DOWN, width=1), fillcolor=C_DOWN),
         text=hover_candle(d, label),
         hoverinfo="text",
-        name=f"Candle ({label})",
+        name=_CANDLE_LBL[label],
         visible=visible,
         showlegend=True,
     ), row=1, col=1)
@@ -226,7 +249,7 @@ for i, (label, d) in enumerate(FRAMES):
         opacity=0.75,
         text=hover_vol(d),
         hoverinfo="text",
-        name=f"Volume ({label})",
+        name=_VOL_LBL[label],
         visible=visible,
         showlegend=True,
     ), row=2, col=1)
@@ -262,7 +285,7 @@ for i, (label, d) in enumerate(FRAMES):
         decreasing=dict(line=dict(color=C_DOWN, width=1.2)),
         text=hover_candle(d, label),
         hoverinfo="text",
-        name=f"OHLC ({label})",
+        name=_OHLC_LBL[label],
         visible=visible,
         showlegend=True,
     ), row=1, col=1)
@@ -275,7 +298,7 @@ for i, (label, d) in enumerate(FRAMES):
         opacity=0.75,
         text=hover_vol(d),
         hoverinfo="text",
-        name=f"Volume ({label})",
+        name=_VOL_LBL[label],
         visible=visible,
         showlegend=True,
     ), row=2, col=1)
