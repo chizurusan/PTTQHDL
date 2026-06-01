@@ -92,20 +92,21 @@ fig1.add_trace(go.Scatter(
 
 fig1.add_hline(
     y=avg_vol,
-    line=dict(color="#94A3B8", width=1, dash="dot"),
-    annotation_text=u"Trung bình {:.2f}%".format(avg_vol),
-    annotation_position="top left",
-    annotation_font=dict(size=10, color="#64748B", family=FONT),
+    line=dict(color="#94A3B8", width=1.2, dash="dot"),
+    annotation_text=u"  Trung bình {:.2f}%".format(avg_vol),
+    annotation_position="top right",
+    annotation_font=dict(size=12, color="#64748B", family=FONT),
 )
 
-fig1.update_layout(**base_layout(height=290))
+_TICK14 = dict(color="#475569", size=14, family=FONT)
+fig1.update_layout(**base_layout(height=440, margin=dict(l=62, r=32, t=18, b=52)))
 fig1.update_xaxes(
     showgrid=True, gridcolor=C_GRID, gridwidth=1,
-    linecolor=C_BORDER, tickfont=TICK_FONT, zeroline=False,
+    linecolor=C_BORDER, tickfont=_TICK14, zeroline=False,
 )
 fig1.update_yaxes(
     showgrid=True, gridcolor=C_GRID, gridwidth=1,
-    linecolor=C_BORDER, tickfont=TICK_FONT,
+    linecolor=C_BORDER, tickfont=_TICK14,
     ticksuffix="%", rangemode="tozero",
     zeroline=True, zerolinecolor=C_GRID, zerolinewidth=1,
 )
@@ -143,29 +144,30 @@ for lvl, lbl in [
         annotation_font=dict(size=9, color="#94A3B8", family=FONT),
     )
 
-# Annotation max drawdown
+# Annotation max drawdown — lon hon, de doc hon
 max_dd_idx = df["Drawdown"].idxmin()
 fig2.add_annotation(
     x=df.loc[max_dd_idx, "Date"],
     y=max_dd,
     text=u"<b>Sụt giảm lớn nhất: {:.1f}%</b>".format(max_dd),
     showarrow=True,
-    arrowhead=2, arrowwidth=1.5, arrowcolor=C_DD,
-    ax=72, ay=-28,
-    font=dict(size=11, color=C_DD, family=FONT),
+    arrowhead=2, arrowwidth=2, arrowcolor=C_DD,
+    ax=80, ay=-34,
+    font=dict(size=13, color=C_DD, family=FONT),
     bgcolor=C_WHITE,
-    bordercolor=C_DD, borderwidth=1.5, borderpad=6,
-    opacity=0.95,
+    bordercolor=C_DD, borderwidth=1.5, borderpad=8,
+    opacity=0.97,
 )
 
-fig2.update_layout(**base_layout(height=290))
+fig2.update_layout(**base_layout(height=440,
+    margin=dict(l=62, r=140, t=18, b=52)))  # r=140 cho nhan tham chieu khong bi cat
 fig2.update_xaxes(
     showgrid=True, gridcolor=C_GRID, gridwidth=1,
-    linecolor=C_BORDER, tickfont=TICK_FONT, zeroline=False,
+    linecolor=C_BORDER, tickfont=_TICK14, zeroline=False,
 )
 fig2.update_yaxes(
     showgrid=True, gridcolor=C_GRID, gridwidth=1,
-    linecolor=C_BORDER, tickfont=TICK_FONT,
+    linecolor=C_BORDER, tickfont=_TICK14,
     ticksuffix="%",
     zeroline=True, zerolinecolor="#CBD5E1", zerolinewidth=1.5,
 )
@@ -284,100 +286,69 @@ badges_dd = (
 )
 
 # ── CSS constants ──────────────────────────────────────────────────────────────
-INNER_TITLE = (
-    f"font-size:15px;font-weight:700;color:#D97706;"
-    f"margin-bottom:4px;font-family:{FONT};"
-)
-INNER_SUB = (
-    f"font-size:13px;color:#64748B;line-height:1.5;"
+CARD_TITLE_CSS = (
+    f"font-size:20px;font-weight:700;color:#111827;"
     f"margin-bottom:8px;font-family:{FONT};"
 )
-BIG_CARD = (
-    "background:#FFFFFF;border:1px solid #E5E7EB;border-radius:18px;"
-    "padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.05);"
+CARD_SUB_CSS = (
+    f"font-size:14px;color:#64748B;line-height:1.6;"
+    f"margin-bottom:20px;font-family:{FONT};"
 )
+CARD_CSS = (
+    "background:#FFFFFF;border:1px solid #E5E7EB;border-radius:20px;"
+    "padding:28px 32px 20px;box-shadow:0 4px 14px rgba(0,0,0,0.05);"
+    "margin-bottom:28px;"
+)
+BADGE_ROW = "margin-bottom:12px;"
 
 # ── Build section HTML ─────────────────────────────────────────────────────────
 NEW_SECTION = f"""<!-- Section 6: Risk -->
-  <style>
-    .s6-row1 {{
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
-    }}
-    @media (max-width: 820px) {{
-      .s6-row1 {{ grid-template-columns: 1fr; }}
-    }}
-  </style>
-
   <div class="section">
     <div class="section-title">
       Section 6 &mdash; Ph&#226;n t&#237;ch r&#7911;i ro &amp; bi&#7871;n &#273;&#7897;ng
     </div>
 
-    <!-- 1 card lon duy nhat -->
-    <div style="{BIG_CARD}">
-
-      <!-- Tieu de + mo ta chung -->
-      <div style="font-size:20px;font-weight:700;color:#D97706;
-                  margin-bottom:4px;font-family:{FONT};">
-        Ph&#226;n t&#237;ch r&#7911;i ro &amp; bi&#7871;n &#273;&#7897;ng gi&#225; BTC
+    <!-- Card 1: Bien dong lan 30 ngay — full width -->
+    <div style="{CARD_CSS}">
+      <div style="{CARD_TITLE_CSS}">
+        Bi&#7871;n &#273;&#7897;ng l&#259;n 30 ng&#224;y
       </div>
-      <div style="font-size:13px;color:#6B7280;margin-bottom:20px;
-                  line-height:1.5;font-family:{FONT};">
-        Theo d&#245;i m&#7913;c bi&#7871;n &#273;&#7897;ng, drawdown v&#224;
-        ph&#226;n ph&#7889;i l&#7907;i su&#7845;t theo t&#7915;ng n&#259;m.
+      <div style="{BADGE_ROW}">{badges_vol}</div>
+      <div style="{CARD_SUB_CSS}">
+        &#272;&#7897; l&#7879;ch chu&#7849;n l&#259;n 30 ng&#224;y c&#7911;a l&#7907;i su&#7845;t ng&#224;y
+        &mdash; gi&#225; tr&#7883; c&#224;ng cao ngh&#297;a l&#224; th&#7883; tr&#432;&#7901;ng
+        c&#224;ng bi&#7871;n &#273;&#7897;ng m&#7841;nh.
       </div>
+      {div1}
+    </div>
 
-      <!-- Hang tren: 2 cot -->
-      <div class="s6-row1">
-
-        <!-- Cot trai: Bien dong lan -->
-        <div>
-          <div style="{INNER_TITLE}">
-            Bi&#7871;n &#273;&#7897;ng l&#259;n 30 ng&#224;y
-          </div>
-          <div style="margin-bottom:6px;">{badges_vol}</div>
-          <div style="{INNER_SUB}">
-            &#272;&#7897; l&#7879;ch chu&#7849;n l&#259;n 30 ng&#224;y c&#7911;a l&#7907;i su&#7845;t ng&#224;y
-            &mdash; gi&#225; tr&#7883; c&#224;ng cao ngh&#297;a l&#224; th&#7883; tr&#432;&#7901;ng
-            c&#224;ng bi&#7871;n &#273;&#7897;ng m&#7841;nh.
-          </div>
-          {div1}
-        </div>
-
-        <!-- Cot phai: Sut giam tu dinh -->
-        <div>
-          <div style="{INNER_TITLE}">
-            M&#7913;c s&#7909;t gi&#7843;m t&#7915; &#273;&#7881;nh
-          </div>
-          <div style="margin-bottom:6px;">{badges_dd}</div>
-          <div style="{INNER_SUB}">
-            Ph&#7847;n tr&#259;m gi&#7843;m so v&#7899;i &#273;&#7881;nh gi&#225; g&#7847;n nh&#7845;t
-            &mdash; c&#224;ng s&#226;u ngh&#297;a l&#224; r&#7911;i ro
-            th&#7883; tr&#432;&#7901;ng c&#224;ng cao.
-          </div>
-          {div2}
-        </div>
-
-      </div><!-- /s6-row1 -->
-
-      <!-- Hang duoi: Box Plot full width -->
-      <div style="border-top:1px solid #F1F5F9;padding-top:20px;">
-        <div style="{INNER_TITLE}">
-          Ph&#226;n ph&#7889;i l&#7907;i su&#7845;t ng&#224;y theo n&#259;m
-        </div>
-        <div style="{INNER_SUB}">
-          Box plot l&#7907;i su&#7845;t ng&#224;y theo t&#7915;ng n&#259;m &mdash;
-          h&#7897;p c&#224;ng r&#7897;ng ngh&#297;a l&#224; n&#259;m &#273;&#243;
-          bi&#7871;n &#273;&#7897;ng c&#224;ng m&#7841;nh.
-          C&#225;c &#273;i&#7875;m r&#7901;i l&#224; ng&#224;y b&#7845;t th&#432;&#7901;ng.
-        </div>
-        {div3}
+    <!-- Card 2: Muc sut giam tu dinh — full width -->
+    <div style="{CARD_CSS}">
+      <div style="{CARD_TITLE_CSS}">
+        M&#7913;c s&#7909;t gi&#7843;m t&#7915; &#273;&#7881;nh
       </div>
+      <div style="{BADGE_ROW}">{badges_dd}</div>
+      <div style="{CARD_SUB_CSS}">
+        Ph&#7847;n tr&#259;m gi&#7843;m so v&#7899;i &#273;&#7881;nh gi&#225; g&#7847;n nh&#7845;t
+        &mdash; c&#224;ng s&#226;u ngh&#297;a l&#224; r&#7911;i ro
+        th&#7883; tr&#432;&#7901;ng c&#224;ng cao.
+      </div>
+      {div2}
+    </div>
 
-    </div><!-- /big card -->
+    <!-- Card 3: Box Plot — full width -->
+    <div style="{CARD_CSS}margin-bottom:0;">
+      <div style="{CARD_TITLE_CSS}">
+        Ph&#226;n ph&#7889;i l&#7907;i su&#7845;t ng&#224;y theo n&#259;m
+      </div>
+      <div style="{CARD_SUB_CSS}">
+        Box plot l&#7907;i su&#7845;t ng&#224;y theo t&#7915;ng n&#259;m &mdash;
+        h&#7897;p c&#224;ng r&#7897;ng ngh&#297;a l&#224; n&#259;m &#273;&#243;
+        bi&#7871;n &#273;&#7897;ng c&#224;ng m&#7841;nh.
+        C&#225;c &#273;i&#7875;m r&#7901;i l&#224; ng&#224;y b&#7845;t th&#432;&#7901;ng.
+      </div>
+      {div3}
+    </div>
 
   </div><!-- /section -->
 
