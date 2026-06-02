@@ -134,6 +134,12 @@ _display_events = [
     ("2021-09-07",u"El Salvador: BTC hợp pháp",         u"Pháp lý",    4,u"Quốc gia đầu tiên công nhận BTC là tiền"),
     ("2023-06-05",u"SEC kiện Binance & Coinbase",       u"Pháp lý",    4,u"SEC khởi kiện lớn về tiền mã hóa"),
     ("2023-08-29",u"Grayscale thắng kiện SEC",          u"Pháp lý",    4,u"Tòa án mở đường cho ETF giao ngay"),
+    # ── Su kien dia chinh tri ────────────────────────────────────────────────
+    ("2020-01-03",u"Mỹ ám sát tướng Soleimani",        u"Địa chính trị", 3,u"Lo ngại xung đột Mỹ–Iran, thị trường biến động ngắn hạn"),
+    ("2022-02-24",u"Nga xâm lược Ukraine",              u"Địa chính trị", 5,u"Chiến tranh Nga–Ukraine bùng nổ, thị trường toàn cầu hỗn loạn"),
+    ("2023-10-07",u"Hamas tấn công Israel",             u"Địa chính trị", 4,u"Xung đột vũ trang bùng nổ tại Trung Đông, BTC tạm thời giảm"),
+    ("2024-04-13",u"Iran tấn công trực tiếp Israel",    u"Địa chính trị", 4,u"Iran phóng 300+ drone & tên lửa — leo thang địa chính trị"),
+    # ── Moc gia ─────────────────────────────────────────────────────────────
     ("2020-12-16",u"BTC vượt $20,000",                  u"Mốc giá",    4,u"Phá vỡ ngưỡng tâm lý $20,000"),
     ("2021-02-16",u"BTC vượt $50,000",                  u"Mốc giá",    3,u"Mốc $50,000"),
     ("2024-11-22",u"BTC tiến sát $100K",                u"Mốc giá",    4,u"Phá ngưỡng $99,000"),
